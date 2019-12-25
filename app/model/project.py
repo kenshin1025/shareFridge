@@ -2,4 +2,4 @@
 class project:
     @staticmethod
     def name():
-        return "CashBook"
+        return "ShareFridge"
