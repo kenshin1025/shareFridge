@@ -9,6 +9,7 @@ from model.user import user
 from controller.AuthenticationHandlers import SigninBaseHandler, SigninHandler, SignupHandler, SignoutHandler
 from controller.CashBookHandlers import CashbookCreateHandler, CashbooksHandler, CashbookShowHandler
 from controller.WebAPIHandlers import IncomeRankHandler, ExpensesRankHandler, MonthlyReportHandler
+from controller.InnerListHandlers import InnerListHandler, InnerCreateHandler
 
 
 class MainHandler(SigninBaseHandler):  # 継承元がSigninBaseHandlerになっているので注意
@@ -22,12 +23,12 @@ class MainHandler(SigninBaseHandler):  # 継承元がSigninBaseHandlerになっ�
         # ダッシュボードを表示
         self.render("dashboard.html", user=_signedInUser)
 
-
 application = tornado.web.Application([
     (r"/", MainHandler),
     (r"/signin", SigninHandler),
     (r"/signup", SignupHandler),
     (r"/signout", SignoutHandler),
+    (r"/inner", InnerListHandler),
     (r"/cashbook/new", CashbookCreateHandler),  # 現金出納帳 新規作成
     (r"/cashbooks", CashbooksHandler),
     (r"/cashbook/show/([0-9]+)", CashbookShowHandler),
