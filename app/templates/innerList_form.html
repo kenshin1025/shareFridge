@@ -1,0 +1,201 @@
+{% extends "_signedin_base.html" %} {% block title %}innerList({{ mode }}){% end
+%} {% block content %}
+<div class="innerList innerList-form">
+  <main role="main" class="container">
+    {% if len(messages) > 0 %}
+    <div class="alert alert-info" role="alert">
+      {% for message in messages %}
+      <p class="mb-0">{{ escape(message) }}</p>
+      {% end %}
+    </div>
+    {% end %} {% if len(errors) > 0 %}
+    <div class="alert alert-danger" role="alert">
+      {% for err in errors %}
+      <p class="mb-0">{{ escape(err) }}</p>
+      {% end %}
+    </div>
+    {% end %} {% if mode == "new" %}
+    <form method="POST">
+      <div class="card">
+        <h5
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          冷蔵庫の中身 - 新規登録
+        </h5>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group col-6 invisible">
+              <!-- 対象データIDは新規登録時未発行なため非表示項目 -->
+              <label for="form-id">対象データID</label>
+              <input
+                readonly
+                type="number"
+                class="form-control"
+                name="form-id"
+                id="form-id"
+                value="{{ int(innerList.attr['id']) if innerList.attr['id'] is not None else '' }}"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="form-product_name">品名</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-product_name"
+              id="form-product_name"
+              value="{{ innerList.attr['product_name'] if innerList.attr['product_name'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-group col-6">
+            <label for="form-lim">賞味期限</label>
+            <!-- 発生日付は当日が初期値のため、データを表示 -->
+            <input
+              readonly
+              type="date"
+              class="form-control"
+              name="form-lim"
+              id="form-lim"
+              required
+              value="{{ str(innerList.attr['lim']) if innerList.attr['lim'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="form-amount">個数</label>
+              <input
+                type="number"
+                class="form-control"
+                name="form-amount"
+                id="form-amount"
+                value="{{ str(innerList.attr['amount']) }}"
+                min="1"
+                required
+              />
+            </div>
+          <div class="form-group">
+            <label for="form-whose">誰のものか</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-whose"
+              id="form-whose"
+              value="{{ innerList.attr['whose'] if innerList.attr['whose'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-group">
+            <label for="form-kind">分類</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-kind"
+              id="form-kind"
+              value="{{ innerList.attr['kind'] if innerList.attr['kind'] is not None else '' }}"
+            />
+          </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <a href="/innerLists" class="btn btn-light" tabindex="-1"
+            >一覧へ戻る</a
+          >
+          <button type="submit" class="btn btn-primary">新規登録</button>
+        </div>
+      </div>
+    </form>
+    {% end %} {% if mode == "show" %}
+    <form method="POST">
+      <div class="card">
+        <h5
+          class="card-header d-flex justify-content-between align-items-center"
+        >
+          冷蔵庫の中身 - 詳細
+        </h5>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group col-6 invisible">
+              <!-- 対象データIDは新規登録時未発行なため非表示項目 -->
+              <label for="form-id">対象データID</label>
+              <input
+                readonly
+                type="number"
+                class="form-control"
+                name="form-id"
+                id="form-id"
+                value="{{ int(innerList.attr['id']) if innerList.attr['id'] is not None else '' }}"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="form-product_name">品名</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-product_name"
+              id="form-product_name"
+              value="{{ innerList.attr['product_name'] if innerList.attr['product_name'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-group col-6">
+            <label for="form-lim">賞味期限</label>
+            <!-- 発生日付は当日が初期値のため、データを表示 -->
+            <input
+              readonly
+              type="date"
+              class="form-control"
+              name="form-lim"
+              id="form-lim"
+              required
+              value="{{ str(innerList.attr['lim']) if innerList.attr['lim'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-row">
+            <div class="form-group col-6">
+              <label for="form-amount">個数</label>
+              <input
+                type="number"
+                class="form-control"
+                name="form-amount"
+                id="form-amount"
+                value="{{ str(innerList.attr['amount']) }}"
+                min="1"
+                required
+              />
+            </div>
+          <div class="form-group">
+            <label for="form-whose">誰のものか</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-whose"
+              id="form-whose"
+              value="{{ innerList.attr['whose'] if innerList.attr['whose'] is not None else '' }}"
+            />
+          </div>
+          <div class="form-group">
+            <label for="form-kind">分類</label>
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              name="form-kind"
+              id="form-kind"
+              value="{{ innerList.attr['kind'] if innerList.attr['kind'] is not None else '' }}"
+            />
+          </div>
+        </div>
+        <div class="card-footer d-flex justify-content-between">
+          <a href="/innerLists" class="btn btn-light" tabindex="-1"
+            >一覧へ戻る</a
+          >
+          <div>
+            <button type="submit" class="btn btn-outline-secondary">
+              削除
+            </button>
+            <button type="submit" class="btn btn-outline-primary">変更</button>
+          </div>
+        </div>
+      </div>
+    </form>
+    {% end %}
+  </main>
+</div>
+{% end %}

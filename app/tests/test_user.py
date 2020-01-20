@@ -13,82 +13,78 @@ def test_mock(self, mock_project_name):
 class test_user(unittest.TestCase):
 
     def setUp(self):
-        self.u = user.build()
-        self.u.attr["email"] = "hoge@fuga.piyo"
-        self.u.attr["name"] = "Hoge"
-        self.u.attr["password"] = "hogehogefugafuga"
+        self.f = user.build()
+        self.f.attr["name"] = "Hoge"
+        self.f.attr["password"] = "hogehogefugafuga"
         user.migrate()
-        self.u.save()
+        self.f.save()
 
     def tearDown(self):
         user.db_cleaner
-        
-    def test_db_is_working(self):
-        u = user.find(self.u.attr["id"])
-        self.assertTrue(type(u) is user)
-        self.assertTrue(u.attr["id"] == 1)
 
-    def test_find_by_email動作確認(self):
-        u = user.find_by_email(self.u.attr["email"])
-        self.assertTrue(type(u) is user)
-        self.assertTrue(u.attr["id"] == 1)
-        self.assertTrue(u.attr["email"] == self.u.attr["email"])
+    def test_db_is_working(self):
+        f = user.find(self.f.attr["id"])
+        self.assertTrue(type(f) is user)
+        self.assertTrue(f.attr["id"] == 1)
 
     # attrが正しい値を持っている
     def test_is_valid(self):
-        self.assertTrue(self.u.is_valid())
+        self.assertTrue(self.f.is_valid())
 
     # attrが間違った値を持っているかをチェックする関数のテスト
     def test_is_valid_with_invarid_attrs(self):
-        cb_wrong = copy.deepcopy(self.u)
+        cb_wrong = copy.deepcopy(self.f)
         cb_wrong.attr["id"] = None # id must be None or a int
         self.assertTrue(cb_wrong.is_valid())
-        cb_wrong = copy.deepcopy(self.u)
+
+        cb_wrong = copy.deepcopy(self.f)
         cb_wrong.attr["id"] = "1" # id must be None or a int
         self.assertFalse(cb_wrong.is_valid())
 
-        cb_wrong = copy.deepcopy(self.u)
-        cb_wrong.attr["email"] = 12345 # email must be a sting
+        cb_wrong = copy.deepcopy(self.f)
+        cb_wrong.attr["name"] = None # password must be a string
         self.assertFalse(cb_wrong.is_valid())
 
-        cb_wrong = copy.deepcopy(self.u)
+        cb_wrong = copy.deepcopy(self.f)
         cb_wrong.attr["name"] = 12345 # name must be a sting
         self.assertFalse(cb_wrong.is_valid())
 
-        cb_wrong = copy.deepcopy(self.u)
+        cb_wrong = copy.deepcopy(self.f)
+        cb_wrong.attr["name"] = "myname" # name must be a sting
+        self.assertTrue(cb_wrong.is_valid())
+
+        cb_wrong = copy.deepcopy(self.f)
         cb_wrong.attr["password"] = None # password must be a string
         self.assertFalse(cb_wrong.is_valid())
 
-        cb_wrong = copy.deepcopy(self.u)
+        cb_wrong = copy.deepcopy(self.f)
         cb_wrong.attr["password"] = 12345 # password must be a string
         self.assertFalse(cb_wrong.is_valid())
 
-        cb_wrong = copy.deepcopy(self.u)
-        cb_wrong.attr["last_updated"] = None # last_updated must be a datetime.datetime object
-        self.assertFalse(cb_wrong.is_valid())
+        cb_wrong = copy.deepcopy(self.f)
+        cb_wrong.attr["password"] = "paspas" # password must be a string
+        self.assertTrue(cb_wrong.is_valid())
 
     def test_build(self):
-        u = user.build()
-        self.assertTrue(type(u) is user)
+        f = user.build()
+        self.assertTrue(type(f) is user)
 
     def test_save_INSERT(self):
-        u = user.build()
-        u.attr["email"] = "hoge2@fuga.piyo"
-        u.attr["name"] = "Hoge"
-        u.attr["password"] = "HogeHogeFugaFuga"
-        result = u.save()
+        f = user.build()
+        f.attr["name"] = "HogeHuga"
+        f.attr["password"] = "HogeHogeFugaFuga"
+        result = f.save()
         self.assertTrue(type(result) is int)
-        self.assertTrue(u.attr["id"] is not None)
+        self.assertTrue(f.attr["id"] is not None)
 
     def test_save_UPDATE(self):
-        u = user.build()
-        u.attr["id"] = 1
-        u.attr["email"] = "new_hoge@fuga.piyo"
-        u.attr["name"] = "new_Hoge"
-        u.attr["password"] = "new_HogeHogeFugaFuga"
-        result = u.save()
+        f = user.build()
+        f.attr["id"] = 1
+        f.attr["name"] = "new_Hoge"
+        f.attr["password"] = "new_HogeHogeFugaFuga"
+        result = f.save()
         self.assertTrue(type(result) is int)
-        self.assertTrue(u.attr["id"] is not None)
+        self.assertTrue(f.attr["id"] is not None)
 
 if __name__ == '__main__':
     # unittestを実行

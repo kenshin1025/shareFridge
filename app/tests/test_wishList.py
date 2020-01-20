@@ -14,10 +14,11 @@ class test_wishList(unittest.TestCase):
 
     def setUp(self):
         self.w = wishList.build()
-        self.w.attr["fridge_id"] = 1
-        self.w.attr["name"] = "tofu"
+        self.w.attr["user_id"] = 1
+        self.w.attr["name"] = "豆腐"
         self.w.attr["quantity"] = 1
-        self.w.attr["class"] = "newseihin"
+        self.w.attr["kind"] = "乳製品"
+        self.w.attr["last_updated"] = datetime.datetime.now()
         wishList.migrate()
         self.w.save()
 
@@ -46,7 +47,7 @@ class test_wishList(unittest.TestCase):
         self.assertFalse(w_wrong.is_valid())
 
         w_wrong = copy.deepcopy(self.w)
-        w_wrong.attr["fridge_id"] = None # fridge_id must be None or a int
+        w_wrong.attr["user_id"] = None # user_id must be None or a int
         self.assertFalse(w_wrong.is_valid())
 
         w_wrong = copy.deepcopy(self.w)
@@ -58,7 +59,7 @@ class test_wishList(unittest.TestCase):
         self.assertFalse(w_wrong.is_valid())
 
         w_wrong = copy.deepcopy(self.w)
-        w_wrong.attr["class"] = 12345 # quantity must be a string
+        w_wrong.attr["kind"] = 12345 # quantity must be a string
         self.assertFalse(w_wrong.is_valid())
 
         w_wrong = copy.deepcopy(self.w)
@@ -69,23 +70,57 @@ class test_wishList(unittest.TestCase):
         w = wishList.build()
         self.assertTrue(type(w) is wishList)
 
-    def test_save_INSERT(self):
-        w = wishList.build()
-        w.attr["fridge_id"] = 1
-        w.attr["name"] = "tofu"
-        w.attr["quantity"] = 1
-        w.attr["class"] = "newseihin"
-        result = w.save()
-        self.assertTrue(type(result) is int)
-        self.assertTrue(w.attr["id"] is not None)
+    def test_name(self):
+        user_id = 2
+        name = "豆腐"
 
-    def test_save_UPDATE(self):
+        w1 = wishList.build()
+        w1.attr["user_id"] = user_id
+        w1.attr["name"] = name
+        w1.attr["quantity"] = 1
+        w1.attr["kind"] = "乳製品"
+        w1_id = w1.save()
+
+        w2 = wishList.build()
+        w2.attr["user_id"] = user_id
+        w2.attr["name"] = name
+        w2.attr["quantity"] = 2
+        w2.attr["kind"] = "乳製品"
+        w2_id = w2.save()
+        w_list = wishList.name(user_id, name)
+        self.assertEqual(len(w_list), 2)
+        self.assertTrue(type(w_list[0]) is wishList)
+        self.assertTrue(w_list[0].attr["quantity"] < w_list[1].attr["quantity"])
+
+    def test_kind(self):
+        user_id = 2
+        kind = "肉"
+
+        w1 = wishList.build()
+        w1.attr["user_id"] = user_id
+        w1.attr["name"] = "牛肉"
+        w1.attr["quantity"] = 1
+        w1.attr["kind"] = kind
+        w1_id = w1.save()
+
+        w2 = wishList.build()
+        w2.attr["user_id"] = user_id
+        w2.attr["name"] = "豚肉"
+        w2.attr["quantity"] = 2
+        w2.attr["kind"] = kind
+        w2_id = w2.save()
+        w_list = wishList.kind(user_id, kind)
+        self.assertEqual(len(w_list), 2)
+        self.assertTrue(type(w_list[0]) is wishList)
+        self.assertTrue(w_list[0].attr["quantity"] < w_list[1].attr["quantity"])
+
+    def test_delete(self):
         w = wishList.build()
         w.attr["id"] = 1
-        w.attr["fridge_id"] = 1
-        w.attr["name"] = "new_tofu"
+        w.attr["user_id"] = 1
+        w.attr["name"] = "豆腐"
         w.attr["quantity"] = 1
-        w.attr["class"] = "newseihin"
+        w.attr["kind"] = "乳製品"
         result = w.save()
         self.assertTrue(type(result) is int)
         self.assertTrue(w.attr["id"] is not None)
@@ -94,7 +129,6 @@ class test_wishList(unittest.TestCase):
         w = wishList.move(1)
         # moveで帰ってきているのがidならDBに保存されている
         self.assertTrue(type(w) is wishList)
-
 
 if __name__ == '__main__':
     # unittestを実行

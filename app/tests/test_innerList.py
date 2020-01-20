@@ -14,12 +14,12 @@ class test_innerList(unittest.TestCase):
 
     def setUp(self):
         self.i = innerList.build()
-        self.i.attr["fridge_id"] = 1
+        self.i.attr["user_id"] = 1
         self.i.attr["product_name"] = "tofu"
         self.i.attr["lim"] = 20201011
         self.i.attr["amount"] = 1
         self.i.attr["whose"] = "me"
-        self.i.attr["class"] = "newseihin"
+        self.i.attr["kind"] = "newseihin"
         innerList.migrate()
         self.i.save()
 
@@ -46,7 +46,7 @@ class test_innerList(unittest.TestCase):
         self.assertFalse(i_wrong.is_valid())
 
         i_wrong = copy.deepcopy(self.i)
-        i_wrong.attr["fridge_id"] = None # password must be a string
+        i_wrong.attr["user_id"] = None # password must be a string
         self.assertFalse(i_wrong.is_valid())
 
         i_wrong = copy.deepcopy(self.i)
@@ -66,7 +66,7 @@ class test_innerList(unittest.TestCase):
         self.assertTrue(i_wrong.is_valid())
 
         i_wrong = copy.deepcopy(self.i)
-        i_wrong.attr["class"] = "class" # password must be a string
+        i_wrong.attr["kind"] = "kind" # password must be a string
         self.assertTrue(i_wrong.is_valid())
 
     def test_build(self):
@@ -75,12 +75,12 @@ class test_innerList(unittest.TestCase):
 
     def test_save_INSERT(self):
         i = innerList.build()
-        i.attr["fridge_id"] = 1
+        i.attr["user_id"] = 1
         i.attr["product_name"] = "tofu"
         i.attr["lim"] = 20201011
         i.attr["amount"] = 1
         i.attr["whose"] = "me"
-        i.attr["class"] = "newseihin"
+        i.attr["kind"] = "newseihin"
         result = i.save()
         self.assertTrue(type(result) is int)
         self.assertTrue(i.attr["id"] is not None)
@@ -88,12 +88,25 @@ class test_innerList(unittest.TestCase):
     def test_save_UPDATE(self):
         i = innerList.build()
         i.attr["id"] = 1
-        i.attr["fridge_id"] = 1
+        i.attr["user_id"] = 1
         i.attr["product_name"] = "tofu"
         i.attr["lim"] = 20201011
         i.attr["amount"] = 1
         i.attr["whose"] = "me"
-        i.attr["class"] = "newseihin"
+        i.attr["kind"] = "newseihin"
+        result = i.save()
+        self.assertTrue(type(result) is int)
+        self.assertTrue(i.attr["id"] is not None)
+
+    def test_delete(self):
+        i = innerList.build()
+        i.attr["id"] = 1
+        i.attr["user_id"] = 1
+        i.attr["product_name"] = "tofu"
+        i.attr["lim"] = 20201011
+        i.attr["amount"] = 1
+        i.attr["whose"] = "me"
+        i.attr["kind"] = "newseihin"
         result = i.save()
         self.assertTrue(type(result) is int)
         self.assertTrue(i.attr["id"] is not None)

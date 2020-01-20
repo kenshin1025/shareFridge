@@ -10,10 +10,8 @@ class user:
     def __init__(self):
         self.attr = {}
         self.attr["id"] = None              # id int notNull
-        self.attr["email"] = None           # email str notNull
-        self.attr["name"] = None            # name str
-        self.attr["password"] = None        # password str notNull
-        self.attr["last_updated"] = None    # last_updated date notNull
+        self.attr["name"] = None            # name str notNull
+        self.attr["pass"] = None        # password str notNull
 
     @staticmethod
     def migrate():
@@ -30,13 +28,11 @@ class user:
             cursor.execute("""
                 CREATE TABLE `table_user` (
                     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                    `email` varchar(255) NOT NULL DEFAULT '',
                     `name` varchar(255) DEFAULT NULL,
                     `password` varchar(255) DEFAULT NULL,
-                    `last_updated` datetime NOT NULL,
                     PRIMARY KEY (`id`),
-                    UNIQUE KEY `OUTER_KEY` (`email`),
-                    KEY `KEY_INDEX` (`email`)
+                    UNIQUE KEY `OUTER_KEY` (`name`),
+                    KEY `KEY_INDEX` (`name`)
                 ); """)
             con.commit()
 
@@ -60,23 +56,26 @@ class user:
         if (len(results) == 0):
             return None
         data = results[0]
-        u = user()
-        u.attr["id"] = data["id"]
-        u.attr["email"] = data["email"]
-        u.attr["name"] = data["name"]
-        u.attr["password"] = data["password"]
-        u.attr["last_updated"] = data["last_updated"]
-        return u
+        f = user()
+        f.attr["id"] = data["id"]
+        f.attr["name"] = data["name"]
+        f.attr["password"] = data["password"]
+        return f
 
     @staticmethod
-    def find_by_email(email):
+    def build():
+        f = user()
+        return f
+
+    @staticmethod
+    def find_by_name(name):
         with DBConnector(dbName='db_%s' % project.name()) as con, \
                 con.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute("""
                 SELECT *
                 FROM   table_user
-                WHERE  email = %s;
-            """, (email,))
+                WHERE  name = %s;
+            """, (name,))
             results = cursor.fetchall()
 
         if (len(results) == 0):
@@ -84,28 +83,16 @@ class user:
         data = results[0]
         u = user()
         u.attr["id"] = data["id"]
-        u.attr["email"] = data["email"]
         u.attr["name"] = data["name"]
         u.attr["password"] = data["password"]
-        u.attr["last_updated"] = data["last_updated"]
         return u
-    
+
     def is_valid(self):
         return all([
           self.attr["id"] is None or type(self.attr["id"]) is int,
-          self.attr["email"] is not None and type(self.attr["email"]) is str,
-          self.attr["name"] is None or type(self.attr["name"]) is str,
+          self.attr["name"] is not None and type(self.attr["name"]) is str,
           self.attr["password"] is not None and type(self.attr["password"]) is str,
-          self.attr["last_updated"] is not None and type(self.attr["last_updated"]) is datetime.datetime
         ])
-
-
-    @staticmethod
-    def build():
-        now = datetime.datetime.now()
-        u = user()
-        u.attr["last_updated"] = now
-        return u
 
     def save(self):
         if(self.is_valid):
@@ -124,13 +111,10 @@ class user:
             # データの保存(INSERT)
             cursor.execute("""
                 INSERT INTO table_user
-                    (email, name, password, last_updated)
+                    (name, password)
                 VALUES
-                    (%s, %s, %s, %s); """,
-                (self.attr["email"],
-                self.attr["name"],
-                self.attr["password"],
-                '{0:%Y-%m-%d %H:%M:%S}'.format(self.attr["last_updated"])))
+                    (%s, %s); """,
+                (self.attr["name"],self.attr["password"],))
 
             cursor.execute("SELECT last_insert_id();")
             results = cursor.fetchone()
@@ -139,7 +123,7 @@ class user:
             con.commit()
 
         return self.attr["id"]
-    
+
     def _db_save_update(self):
 
         with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
@@ -147,15 +131,11 @@ class user:
             # データの保存(UPDATE)
             cursor.execute("""
                 UPDATE table_user
-                SET email = %s,
-                    name = %s,
-                    password = %s,
-                    last_updated = %s
+                SET name = %s,
+                    password = %s
                 WHERE id = %s; """,
-                (self.attr["email"],
-                self.attr["name"],
+                (self.attr["name"],
                 self.attr["password"],
-                '{0:%Y-%m-%d %H:%M:%S}'.format(self.attr["last_updated"]),
                 self.attr["id"]))
 
             con.commit()

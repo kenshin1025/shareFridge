@@ -38,15 +38,15 @@ class SigninHandler(SigninBaseHandler):
 
     def post(self):
         # パラメータの取得
-        _email = self.get_argument("form-email", None)
+        _name = self.get_argument("form-name", None)
         _raw_pass = self.get_argument("form-password", None)
         
         # エラーメッセージの初期化
         errors = []
 
         # 入力項目の必須チェック
-        if _email == None or _raw_pass == None:    
-            if _email == None: errors.append("Sign in ID(Email Address) is required.")
+        if _name == None or _raw_pass == None:    
+            if _name == None: errors.append("Sign in ID(name) is required.")
             if _raw_pass == None: errors.append("Password is required.")
             self.render("signin.html", errors=errors, messages=[])
             return
@@ -55,12 +55,12 @@ class SigninHandler(SigninBaseHandler):
         _pass = hashlib.sha224(_raw_pass.encode()).hexdigest()
 
         # メールアドレスでユーザー情報を取得
-        u = user.find_by_email(_email)
+        u = user.find_by_name(_name)
 
         # 認証(ユーザーが存在する & パスワードが一致する で認証OK)
         if u == None or _pass != u.attr["password"]:
             # 認証失敗
-            errors.append("Sorry, your ID(Email Address) or password cannot be recognized.")
+            errors.append("Sorry, your ID(name) or password cannot be recognized.")
             self.render("signin.html", errors=errors, messages=[])
             return
 
@@ -85,13 +85,11 @@ class SignupHandler(SigninBaseHandler):
 
     def post(self):
         # パラメータの取得
-        _email = self.get_argument("form-email", None)
         _name = self.get_argument("form-name", None)
         _raw_pass = self.get_argument("form-password", None)
         
         # 入力項目の必須チェック
         errors = []
-        if _email == None: errors.append("ID(Email Address) is required.")
         if _name == None: errors.append("Name is required.")
         if _raw_pass == None: errors.append("Password is required.")
         if len(errors) > 0: # エラーはサインイン画面に渡す
@@ -102,16 +100,15 @@ class SignupHandler(SigninBaseHandler):
         _pass = hashlib.sha224(_raw_pass.encode()).hexdigest()
 
         # メールアドレスでユーザー情報を取得
-        u = user.find_by_email(_email)
+        u = user.find_by_name(_name)
 
         # メールアドレスの重複を許可しない
         if u is not None:
-            self.render("signup.html", errors=["The ID(Email Address) cannot be used."], messages=[])
+            self.render("signup.html", errors=["The ID(name) cannot be used."], messages=[])
             return
 
         # ユーザー情報を保存
         u = user.build()
-        u.attr["email"] = _email
         u.attr["name"] = _name
         u.attr["password"] = _pass
         u.save()

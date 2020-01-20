@@ -10,12 +10,12 @@ class innerList:
     def __init__(self):
         self.attr = {}
         self.attr["id"] = None              # id int notNull
-        self.attr["fridge_id"] = None       # 冷蔵庫id
+        self.attr["user_id"] = None       # 冷蔵庫id
         self.attr["product_name"] = None    # 品名
         self.attr["lim"] = None           # 賞味期限
         self.attr["amount"] = None          # 個数
         self.attr["whose"] = None           # 誰のものか
-        self.attr["class"] = None           # 分類
+        self.attr["kind"] = None           # 分類
 
     @staticmethod
     def migrate():
@@ -32,12 +32,12 @@ class innerList:
             cursor.execute("""
                 CREATE TABLE `table_innerList` (
                     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                    `fridge_id` int(11) unsigned NOT NULL,
+                    `user_id` int(11) unsigned NOT NULL,
                     `product_name` varchar(255) DEFAULT NULL,
                     `lim` int(11) NOT NULL,
                     `amount` decimal(12,0) NOT NULL DEFAULT '0',
                     `whose` varchar(255) DEFAULT NULL,
-                    `class` varchar(255) DEFAULT NULL,
+                    `kind` varchar(255) DEFAULT NULL,
                     PRIMARY KEY (`id`)
                 ); """)
             con.commit()
@@ -64,12 +64,12 @@ class innerList:
         data = results[0]
         i = innerList()
         i.attr["id"] = data["id"]
-        i.attr["fridge_id"] = data["fridge_id"]
+        i.attr["user_id"] = data["user_id"]
         i.attr["product_name"] = data["product_name"]
         i.attr["lim"] = data["lim"]
         i.attr["amount"] = data["amount"]
         i.attr["whose"] = data["whose"]
-        i.attr["class"] = data["class"]
+        i.attr["kind"] = data["kind"]
         return i
 
     @staticmethod
@@ -80,12 +80,12 @@ class innerList:
     def is_valid(self):
         return all([
           self.attr["id"] is None or type(self.attr["id"]) is int,
-          self.attr["fridge_id"] is not None and type(self.attr["fridge_id"]) is int,
+          self.attr["user_id"] is not None and type(self.attr["user_id"]) is int,
           self.attr["product_name"] is not None and type(self.attr["product_name"]) is str,
           self.attr["lim"] is not None and type(self.attr["lim"]) is int,
           self.attr["amount"] is not None and type(self.attr["amount"]) is int,
           self.attr["whose"] is not None and type(self.attr["whose"]) is str,
-          self.attr["class"] is not None and type(self.attr["class"]) is str,
+          self.attr["kind"] is not None and type(self.attr["kind"]) is str,
         ])
 
     def save(self):
@@ -105,15 +105,15 @@ class innerList:
             # データの保存(INSERT)
             cursor.execute("""
                 INSERT INTO table_innerList
-                    (fridge_id, product_name, lim, amount, whose, class)
+                    (user_id, product_name, lim, amount, whose, kind)
                 VALUES
                     (%s, %s, %s, %s, %s, %s); """,
-                (self.attr["fridge_id"],
+                (self.attr["user_id"],
                 self.attr["product_name"],
                 self.attr["lim"],
                 self.attr["amount"],
                 self.attr["whose"],
-                self.attr["class"]))
+                self.attr["kind"]))
 
             cursor.execute("SELECT last_insert_id();")
             results = cursor.fetchone()
@@ -130,19 +130,19 @@ class innerList:
             # データの保存(UPDATE)
             cursor.execute("""
                 UPDATE table_innerList
-                SET fridge_id = %s,
+                SET user_id = %s,
                     product_name = %s,
                     lim = %s,
                     amount = %s,
                     whose = %s,
-                    class = %s
+                    kind = %s
                 WHERE id = %s; """,
-                (self.attr["fridge_id"],
+                (self.attr["user_id"],
                 self.attr["product_name"],
                 self.attr["lim"],
                 self.attr["amount"],
                 self.attr["whose"],
-                self.attr["class"],
+                self.attr["kind"],
                 self.attr["id"]))
 
             con.commit()
@@ -150,26 +150,39 @@ class innerList:
         return self.attr["id"]
 
     @staticmethod
-    def select_by_fridge_id(fridge_id):
+    def select_by_user_id(user_id):
         with DBConnector(dbName='db_%s' % project.name()) as con, \
                 con.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute("""
                 SELECT *
                 FROM   table_innerList
-                WHERE  fridge_id = %s;
-            """, (fridge_id,))
+                WHERE  user_id = %s;
+            """, (user_id,))
             results = cursor.fetchall()
 
         records = []
         for data in results:
-            f = fridge()
-            f.attr["id"] = data["id"]
-            f.attr["fridge_id"] = data["fridge_id"]
-            f.attr["product_name"] = data["product_name"]
-            f.attr["lim"] = data["lim"]
-            f.attr["amount"] = data["amount"]
-            f.attr["whose"] = data["whose"]
-            f.attr["class"] = data["class"]
-            records.append(f)
+            il = innerList()
+            il.attr["id"] = data["id"]
+            il.attr["user_id"] = data["user_id"]
+            il.attr["product_name"] = data["product_name"]
+            il.attr["lim"] = data["lim"]
+            il.attr["amount"] = data["amount"]
+            il.attr["whose"] = data["whose"]
+            il.attr["kind"] = data["kind"]
+            il.attr["last_updated"] = data["last_updated"]
+            records.append(w)
 
         return records
+
+    def delete(self):
+        if self.attr["id"] == None: return None
+        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
+            # データの削除(DELETE)
+            cursor.execute("""
+                DELETE FROM table_innerList
+                WHERE id = %s; """,
+                (self.attr["id"],))
+            con.commit()
+
+            return self.attr["id"]

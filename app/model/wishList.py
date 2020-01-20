@@ -10,10 +10,10 @@ class wishList:
     def __init__(self):
         self.attr = {}
         self.attr["id"] = None              # id int notNull
-        self.attr["fridge_id"] = None       # fridge_id int notNull
+        self.attr["user_id"] = None       # user_id int notNull
         self.attr["name"] = None            # name str notNull
         self.attr["quantity"] = None          # quantity int notNull
-        self.attr["class"] = None           # class str notNull
+        self.attr["kind"] = None           # kind str notNull
         self.attr["last_updated"] = None    # last_updated date notNull
 
     @staticmethod
@@ -31,13 +31,13 @@ class wishList:
             cursor.execute("""
                 CREATE TABLE `table_wishList` (
                     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                    `fridge_id` int(11) unsigned NOT NULL,
+                    `user_id` int(11) unsigned NOT NULL,
                     `name` varchar(255) DEFAULT NULL,
                     `quantity` int(11) NOT NULL,
-                    `class` varchar(255) DEFAULT NULL,
+                    `kind` varchar(255) DEFAULT NULL,
                     `last_updated` datetime NOT NULL,
                     PRIMARY KEY (`id`),
-                    KEY `fridge_id` (`fridge_id`)
+                    KEY `user_id` (`user_id`)
                 )""")
             con.commit()
 
@@ -63,20 +63,20 @@ class wishList:
         data = results[0]
         w = wishList()
         w.attr["id"] = data["id"]
-        w.attr["fridge_id"] = data["fridge_id"]
+        w.attr["user_id"] = data["user_id"]
         w.attr["name"] = data["name"]
         w.attr["quantity"] = data["quantity"]
-        w.attr["class"] = data["class"]
+        w.attr["kind"] = data["kind"]
         w.attr["last_updated"] = data["last_updated"]
         return w
 
     def is_valid(self):
         return all([
           self.attr["id"] is None or type(self.attr["id"]) is int,
-          self.attr["fridge_id"] is not None and type(self.attr["fridge_id"]) is int,
+          self.attr["user_id"] is not None and type(self.attr["user_id"]) is int,
           self.attr["name"] is None or type(self.attr["name"]) is str,
           self.attr["quantity"] is not None and type(self.attr["quantity"]) is int,
-          self.attr["class"] is not None and type(self.attr["class"]) is str,
+          self.attr["kind"] is not None and type(self.attr["kind"]) is str,
           self.attr["last_updated"] is not None and type(self.attr["last_updated"]) is datetime.datetime
         ])
 
@@ -104,13 +104,13 @@ class wishList:
             # データの保存(INSERT)
             cursor.execute("""
                 INSERT INTO table_wishList
-                    (fridge_id, name, quantity, class, last_updated)
+                    (user_id, name, quantity, kind, last_updated)
                 VALUES
                     (%s, %s, %s, %s, %s); """,
-                (self.attr["fridge_id"],
+                (self.attr["user_id"],
                 self.attr["name"],
                 self.attr["quantity"],
-                self.attr["class"],
+                self.attr["kind"],
                 '{0:%Y-%m-%d %H:%M:%S}'.format(self.attr["last_updated"])))
 
             cursor.execute("SELECT last_insert_id();")
@@ -128,22 +128,46 @@ class wishList:
             # データの保存(UPDATE)
             cursor.execute("""
                 UPDATE table_wishList
-                SET fridge_id = %s,
+                SET user_id = %s,
                     name = %s,
                     quantity = %s,
-                    class = %s,
+                    kind = %s,
                     last_updated = %s
                 WHERE id = %s; """,
-                (self.attr["fridge_id"],
+                (self.attr["user_id"],
                 self.attr["name"],
                 self.attr["quantity"],
-                self.attr["class"],
+                self.attr["kind"],
                 '{0:%Y-%m-%d %H:%M:%S}'.format(self.attr["last_updated"]),
                 self.attr["id"]))
 
             con.commit()
 
         return self.attr["id"]
+
+    @staticmethod
+    def select_by_user_id(user_id):
+        with DBConnector(dbName='db_%s' % project.name()) as con, \
+                con.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM   table_wishList
+                WHERE  user_id = %s;
+            """, (user_id,))
+            results = cursor.fetchall()
+
+        records = []
+        for data in results:
+            w = wishList()
+            w.attr["id"] = data["id"]
+            w.attr["user_id"] = data["user_id"]
+            w.attr["name"] = data["name"]
+            w.attr["quantity"] = data["quantity"]
+            w.attr["kind"] = data["kind"]
+            w.attr["last_updated"] = data["last_updated"]
+            records.append(w)
+
+        return records
 
     # 指定したidのデータ取り出しデータベースから削除する関数
     @staticmethod
@@ -162,15 +186,15 @@ class wishList:
             data = results[0]
             w = wishList()
             w.attr["id"] = data["id"]
-            w.attr["fridge_id"] = data["fridge_id"]
+            w.attr["user_id"] = data["user_id"]
             w.attr["name"] = data["name"]
             w.attr["quantity"] = data["quantity"]
-            w.attr["class"] = data["class"]
+            w.attr["kind"] = data["kind"]
             w.attr["last_updated"] = data["last_updated"]
 
             # データの削除(DELETE)
             cursor.execute("""
-                DELETE 
+                DELETE
                 FROM table_wishList
                 WHERE id = %s; """,
                 (id,)
@@ -178,3 +202,42 @@ class wishList:
             con.commit()
 
         return w
+
+    def delete(self):
+        if self.attr["id"] == None: return None
+        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
+            # データの削除(DELETE)
+            cursor.execute("""
+                DELETE FROM table_wishList
+                WHERE id = %s; """,
+                (self.attr["id"],))
+            con.commit()
+        return self.attr["id"]
+
+    @staticmethod
+    def name(user_id, name):
+        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
+            cursor.execute("""
+                SELECT id FROM table_wishList
+                WHERE user_id = %s and name = %s
+                ORDER BY `quantity` ASC; """,
+                (user_id,name,))
+            con.commit()
+            recodes = cursor.fetchall()
+
+        w_list = [wishList.find(recode[0]) for recode in recodes]
+        return w_list
+
+    @staticmethod
+    def kind(user_id, kind):
+        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
+            cursor.execute("""
+                SELECT id FROM table_wishList
+                WHERE user_id = %s and kind = %s
+                ORDER BY `quantity` ASC; """,
+                (user_id,kind,))
+            con.commit()
+            recodes = cursor.fetchall()
+
+        w_list = [wishList.find(recode[0]) for recode in recodes]
+        return w_list

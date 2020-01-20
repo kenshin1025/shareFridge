@@ -111,3 +111,23 @@ class fridge:
             con.commit()
 
         return self.attr["id"]
+
+    @staticmethod
+    def select_by_famiry_id(famiry_id):
+        with DBConnector(dbName='db_%s' % project.name()) as con, \
+                con.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            cursor.execute("""
+                SELECT *
+                FROM   table_fridge
+                WHERE  famiry_id = %s;
+            """, (famiry_id,))
+            results = cursor.fetchall()
+
+        records = []
+        for data in results:
+            f = fridge()
+            f.attr["id"] = data["id"]
+            f.attr["famiry_id"] = data["famiry_id"]
+            records.append(f)
+
+        return records
