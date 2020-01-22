@@ -10,9 +10,9 @@ class wishList:
     def __init__(self):
         self.attr = {}
         self.attr["id"] = None              # id int notNull
-        self.attr["user_id"] = None       # user_id int notNull
+        self.attr["fridge_id"] = None       # fridge_id int notNull
         self.attr["name"] = None            # name str notNull
-        self.attr["quantity"] = None          # quantity str notNull
+        self.attr["quantity"] = None          # quantity int notNull
         self.attr["kind"] = None           # kind str notNull
         self.attr["last_updated"] = None    # last_updated date notNull
 
@@ -31,13 +31,13 @@ class wishList:
             cursor.execute("""
                 CREATE TABLE `table_wishList` (
                     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-                    `user_id` int(11) unsigned NOT NULL,
+                    `fridge_id` int(11) unsigned NOT NULL,
                     `name` varchar(255) DEFAULT NULL,
-                    `quantity` varchar(255) DEFAULT NULL,
+                    `quantity` int(11) NOT NULL,
                     `kind` varchar(255) DEFAULT NULL,
                     `last_updated` datetime NOT NULL,
                     PRIMARY KEY (`id`),
-                    KEY `user_id` (`user_id`)
+                    KEY `fridge_id` (`fridge_id`)
                 )""")
             con.commit()
 
@@ -63,7 +63,7 @@ class wishList:
         data = results[0]
         w = wishList()
         w.attr["id"] = data["id"]
-        w.attr["user_id"] = data["user_id"]
+        w.attr["fridge_id"] = data["fridge_id"]
         w.attr["name"] = data["name"]
         w.attr["quantity"] = data["quantity"]
         w.attr["kind"] = data["kind"]
@@ -73,9 +73,9 @@ class wishList:
     def is_valid(self):
         return all([
           self.attr["id"] is None or type(self.attr["id"]) is int,
-          self.attr["user_id"] is not None and type(self.attr["user_id"]) is int,
+          self.attr["fridge_id"] is not None and type(self.attr["fridge_id"]) is int,
           self.attr["name"] is None or type(self.attr["name"]) is str,
-          self.attr["quantity"] is not None and type(self.attr["quantity"]) is str,
+          self.attr["quantity"] is not None and type(self.attr["quantity"]) is int,
           self.attr["kind"] is not None and type(self.attr["kind"]) is str,
           self.attr["last_updated"] is not None and type(self.attr["last_updated"]) is datetime.datetime
         ])
@@ -104,10 +104,10 @@ class wishList:
             # データの保存(INSERT)
             cursor.execute("""
                 INSERT INTO table_wishList
-                    (user_id, name, quantity, kind, last_updated)
+                    (fridge_id, name, quantity, kind, last_updated)
                 VALUES
                     (%s, %s, %s, %s, %s); """,
-                (self.attr["user_id"],
+                (self.attr["fridge_id"],
                 self.attr["name"],
                 self.attr["quantity"],
                 self.attr["kind"],
@@ -128,13 +128,13 @@ class wishList:
             # データの保存(UPDATE)
             cursor.execute("""
                 UPDATE table_wishList
-                SET user_id = %s,
+                SET fridge_id = %s,
                     name = %s,
                     quantity = %s,
                     kind = %s,
                     last_updated = %s
                 WHERE id = %s; """,
-                (self.attr["user_id"],
+                (self.attr["fridge_id"],
                 self.attr["name"],
                 self.attr["quantity"],
                 self.attr["kind"],
@@ -146,21 +146,21 @@ class wishList:
         return self.attr["id"]
 
     @staticmethod
-    def select_by_user_id(user_id):
+    def select_by_fridge_id(fridge_id):
         with DBConnector(dbName='db_%s' % project.name()) as con, \
                 con.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute("""
                 SELECT *
                 FROM   table_wishList
-                WHERE  user_id = %s;
-            """, (user_id,))
+                WHERE  fridge_id = %s;
+            """, (fridge_id,))
             results = cursor.fetchall()
 
         records = []
         for data in results:
             w = wishList()
             w.attr["id"] = data["id"]
-            w.attr["user_id"] = data["user_id"]
+            w.attr["fridge_id"] = data["fridge_id"]
             w.attr["name"] = data["name"]
             w.attr["quantity"] = data["quantity"]
             w.attr["kind"] = data["kind"]
@@ -186,7 +186,7 @@ class wishList:
             data = results[0]
             w = wishList()
             w.attr["id"] = data["id"]
-            w.attr["user_id"] = data["user_id"]
+            w.attr["fridge_id"] = data["fridge_id"]
             w.attr["name"] = data["name"]
             w.attr["quantity"] = data["quantity"]
             w.attr["kind"] = data["kind"]
@@ -203,25 +203,15 @@ class wishList:
 
         return w
 
-    def delete(self):
-        if self.attr["id"] == None: return None
-        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
-            # データの削除(DELETE)
-            cursor.execute("""
-                DELETE FROM table_wishList
-                WHERE id = %s; """,
-                (self.attr["id"],))
-            con.commit()
-        return self.attr["id"]
 
     @staticmethod
-    def name(user_id, name):
+    def name(fridge_id, name):
         with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
             cursor.execute("""
                 SELECT id FROM table_wishList
-                WHERE user_id = %s and name = %s
+                WHERE fridge_id = %s and name = %s
                 ORDER BY `quantity` ASC; """,
-                (user_id,name,))
+                (fridge_id,name,))
             con.commit()
             recodes = cursor.fetchall()
 
@@ -229,38 +219,15 @@ class wishList:
         return w_list
 
     @staticmethod
-    def kind(user_id, kind):
+    def kind(fridge_id, kind):
         with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor() as cursor:
             cursor.execute("""
                 SELECT id FROM table_wishList
-                WHERE user_id = %s and kind = %s
+                WHERE fridge_id = %s and kind = %s
                 ORDER BY `quantity` ASC; """,
-                (user_id,kind,))
+                (fridge_id,kind,))
             con.commit()
             recodes = cursor.fetchall()
 
         w_list = [wishList.find(recode[0]) for recode in recodes]
         return w_list
-
-    @staticmethod
-    def search(user_id,word):
-        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor(MySQLdb.cursors.DictCursor) as cursor:
-            sql = "SELECT * FROM table_wishList WHERE name LIKE '{}%' OR kind LIKE '{}%' AND user_id = {}".format(word,word,user_id)
-            print(sql)
-            cursor.execute(sql)
-            con.commit()
-            results = cursor.fetchall()
-
-        records = []
-        # print(results)
-        for data in results:
-            w = wishList()
-            w.attr["id"] = data["id"]
-            w.attr["user_id"] = data["user_id"]
-            w.attr["name"] = data["name"]
-            w.attr["quantity"] = data["quantity"]
-            w.attr["kind"] = data["kind"]
-            w.attr["last_updated"] = data["last_updated"]
-            records.append(w)
-
-        return records

@@ -1,4 +1,4 @@
-{% extends "_signedin_base.html" %} {% block title %}innerList({{ mode }}){% end
+{% extends "_signedin_base.html" %} {% block title %}InnerLists({{ mode }}){% end
 %} {% block content %}
 <div class="innerList innerList-form">
   <main role="main" class="container">
@@ -44,6 +44,7 @@
               class="form-control form-control-lg"
               name="form-product_name"
               id="form-product_name"
+              required
               value="{{ innerList.attr['product_name'] if innerList.attr['product_name'] is not None else '' }}"
             />
           </div>
@@ -51,12 +52,10 @@
             <label for="form-lim">賞味期限</label>
             <!-- 発生日付は当日が初期値のため、データを表示 -->
             <input
-              readonly
               type="date"
               class="form-control"
               name="form-lim"
               id="form-lim"
-              required
               value="{{ str(innerList.attr['lim']) if innerList.attr['lim'] is not None else '' }}"
             />
           </div>
@@ -70,7 +69,6 @@
                 id="form-amount"
                 value="{{ str(innerList.attr['amount']) }}"
                 min="1"
-                required
               />
             </div>
           <div class="form-group">
@@ -95,14 +93,14 @@
           </div>
         </div>
         <div class="card-footer d-flex justify-content-between">
-          <a href="/innerLists" class="btn btn-light" tabindex="-1"
+          <a href="/" class="btn btn-light" tabindex="-1"
             >一覧へ戻る</a
           >
           <button type="submit" class="btn btn-primary">新規登録</button>
         </div>
       </div>
     </form>
-    {% end %} {% if mode == "show" %}
+    {% end %} {% if mode == "edit" %}
     <form method="POST">
       <div class="card">
         <h5
@@ -132,6 +130,7 @@
               class="form-control form-control-lg"
               name="form-product_name"
               id="form-product_name"
+              required
               value="{{ innerList.attr['product_name'] if innerList.attr['product_name'] is not None else '' }}"
             />
           </div>
@@ -139,12 +138,10 @@
             <label for="form-lim">賞味期限</label>
             <!-- 発生日付は当日が初期値のため、データを表示 -->
             <input
-              readonly
               type="date"
               class="form-control"
               name="form-lim"
               id="form-lim"
-              required
               value="{{ str(innerList.attr['lim']) if innerList.attr['lim'] is not None else '' }}"
             />
           </div>
@@ -158,7 +155,6 @@
                 id="form-amount"
                 value="{{ str(innerList.attr['amount']) }}"
                 min="1"
-                required
               />
             </div>
           <div class="form-group">
@@ -183,13 +179,10 @@
           </div>
         </div>
         <div class="card-footer d-flex justify-content-between">
-          <a href="/innerLists" class="btn btn-light" tabindex="-1"
+          <a href="/" class="btn btn-light" tabindex="-1"
             >一覧へ戻る</a
           >
           <div>
-            <button type="submit" class="btn btn-outline-secondary">
-              削除
-            </button>
             <button type="submit" class="btn btn-outline-primary">変更</button>
           </div>
         </div>

@@ -34,8 +34,8 @@ class innerList:
                     `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
                     `user_id` int(11) unsigned NOT NULL,
                     `product_name` varchar(255) DEFAULT NULL,
-                    `lim` int(11) NOT NULL,
-                    `amount` decimal(12,0) NOT NULL DEFAULT '0',
+                    `lim` varchar(255) DEFAULT NULL,
+                    `amount` varchar(255) DEFAULT NULL,
                     `whose` varchar(255) DEFAULT NULL,
                     `kind` varchar(255) DEFAULT NULL,
                     PRIMARY KEY (`id`)
@@ -82,8 +82,8 @@ class innerList:
           self.attr["id"] is None or type(self.attr["id"]) is int,
           self.attr["user_id"] is not None and type(self.attr["user_id"]) is int,
           self.attr["product_name"] is not None and type(self.attr["product_name"]) is str,
-          self.attr["lim"] is not None and type(self.attr["lim"]) is int,
-          self.attr["amount"] is not None and type(self.attr["amount"]) is int,
+          self.attr["lim"] is not None and type(self.attr["lim"]) is str,
+          self.attr["amount"] is not None and type(self.attr["amount"]) is str,
           self.attr["whose"] is not None and type(self.attr["whose"]) is str,
           self.attr["kind"] is not None and type(self.attr["kind"]) is str,
         ])
@@ -170,8 +170,7 @@ class innerList:
             il.attr["amount"] = data["amount"]
             il.attr["whose"] = data["whose"]
             il.attr["kind"] = data["kind"]
-            il.attr["last_updated"] = data["last_updated"]
-            records.append(w)
+            records.append(il)
 
         return records
 
@@ -186,3 +185,26 @@ class innerList:
             con.commit()
 
             return self.attr["id"]
+
+    @staticmethod
+    def search(user_id,word):
+        with DBConnector(dbName='db_%s' % project.name()) as con, con.cursor(MySQLdb.cursors.DictCursor) as cursor:
+            sql = "SELECT * FROM table_innerList WHERE product_name LIKE '{}%' OR whose LIKE '{}%' OR kind LIKE '{}%' AND user_id = {}".format(word,word,word,user_id)
+            print(sql)
+            cursor.execute(sql)
+            con.commit()
+            results = cursor.fetchall()
+
+        records = []
+        for data in results:
+            il = innerList()
+            il.attr["id"] = data["id"]
+            il.attr["user_id"] = data["user_id"]
+            il.attr["product_name"] = data["product_name"]
+            il.attr["lim"] = data["lim"]
+            il.attr["amount"] = data["amount"]
+            il.attr["whose"] = data["whose"]
+            il.attr["kind"] = data["kind"]
+            records.append(il)
+
+        return records

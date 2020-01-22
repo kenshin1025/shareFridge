@@ -1,14 +1,14 @@
 {% extends "_signedin_base.html" %}
-{% block title %}WishLists{% end %}
+{% block title %}innerList{% end %}
 {% block content %}
-<div class="wishLists container-fluid">
+<div class="innerLists container-fluid">
     <div class="card">
         <h5 class="card-header d-flex justify-content-between align-items-center">
-            ほしいものリスト
-            <a class="btn btn-primary" href="/wishlist/new" role="button">新規登録</a>
+            冷蔵庫の中身リスト
+            <a class="btn btn-primary" href="/new" role="button">新規登録</a>
         </h5>
         <form class="input-group w-25 pt-3" method="get">
-           <input type="text" name="word" class="form-control" placeholder="品名または分類">
+           <input type="text" name="word" class="form-control" placeholder="品名または誰のものかまたは分類">
             <span class="input-group-btn">
                 <button type="submit" class="btn btn-primary">検索</button>
            </span>
@@ -30,30 +30,29 @@
             {% end %}
             <table class="table table-hover">
                 <thead>
-                    <tr class="row">
-                        <th class="col">#</th>
-                        <th class="col">品名</th>
-                        <th class="col">個数</th>
-                        <th class="col">分類</th>
-                        <th class="col">操作</th>
+                    <tr>
+                        <th>#</th>
+                        <th>品名</th>
+                        <th>賞味期限</th>
+                        <th>個数</th>
+                        <th>誰のものか</th>
+                        <th>分類</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for index, wishList in enumerate(wishLists) %}
-                    <tr class="row" data-href="/wishList/show/{{ wishList.attr["id"] }}">
-                        <td class="col">{{ index+1 }}</td>
-                        <td class="col">{{ str(wishList.attr["name"]) }}</td>
-                        <td class="col">{{ wishList.attr["quantity"] }}</td>
-                        <td class="col">{{ str(wishList.attr["kind"]) }}</td class="col">
-                        <td >
-                            <form style="display: inline;" class="pr-5" action="/wishlist/move" method="POST">
-                                <input type="hidden" name="wishlist_id" id="wishlist_id"
-                                    value="{{ wishList.attr["id"] }}">
-                                <button type="submit" class="btn btn-success">買った</button>
-                            </form>
-                            <form style="display: inline;" class="pr-5" action="/wishlist/delete" method="POST">
-                                <input type="hidden" name="wishlist_id" id="wishlist_id"
-                                    value="{{ wishList.attr["id"] }}">
+                    {% for index, innerList in enumerate(innerLists) %}
+                    <tr data-href="/innerList/show/{{ innerList.attr["id"] }}">
+                        <td>{{ index+1 }}</td>
+                        <td>{{ str(innerList.attr["product_name"]) }}</td>
+                        <td>{{ innerList.attr["lim"] }}</td>
+                        <td>{{ str(innerList.attr["amount"]) }}</td>
+                        <td>{{ str(innerList.attr["whose"]) }}</td>
+                        <td>{{ str(innerList.attr["kind"]) }}</td>
+                        <td>
+                            <form action="/delete" method="POST">
+                                <input type="hidden" name="innerlist_id" id="innerlist_id"
+                                    value="{{ innerList.attr["id"] }}">
                                 <button type="submit" class="btn btn-danger">削除</button>
                             </form>
                         </td>
@@ -61,14 +60,14 @@
                     {% end %}
                 </tbody>
             </table>
-            {% if len(wishLists) == 0 %}
+            {% if len(innerLists) == 0 %}
             <div class="alert alert-info" role="alert">
-                データがありません。<a href="/wishlist/new">新規登録</a>してください。
+                データがありません。<a href="/new">新規登録</a>してください。
             </div>
             {% end %}
         </div>
         <div class="card-footer d-flex justify-content-between">
-            <a class="btn btn-primary" href="/" role="button">冷蔵庫の中身一覧へ</a>
+            <a class="btn btn-primary" href="/wishlist" role="button">ほしい物リスト一覧へ</a>
         </div>
     </div>
     <script>
